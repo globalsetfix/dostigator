@@ -98,13 +98,7 @@ function optionLineClick(e) {
                        imageLayerFirst.setAttribute("src", dataMask);
                        imageLayerFirst.setAttribute("data-src", dataMask);
                        imageLayerFirst.style.left = '0';
-                       imageLayerFirst.style.removeProperty('bottom');
-                       imageLayerFirst.style.removeProperty('top');
-                       if(lineOptionId == 98 || lineOptionId == 535){
-                          imageLayerFirst.style.bottom = '0';
-                       } else {
-                          imageLayerFirst.style.top = '0';
-                       }
+                       imageLayerFirst.style.top = '0';
                     }
 
                     // SIZE CLICK
@@ -115,22 +109,48 @@ function optionLineClick(e) {
                        let attributeId = nextParent.getAttribute('attribute-id');
                        let nextOptionBlock = nextParent.nextElementSibling.childNodes[1];
                        let attributeTitle = nextParent.childNodes[1].innerHTML;
-                       updatePrices(oneId, productId, attributeId, nextOptionBlock, attributeLine, attributeTitle, currentQty, i);
+                       updatePrices(oneId, productId, attributeId, nextOptionBlock, attributeTitle, currentQty, i);
                     }
 
-                    // PAPER CLICK
+                    // FRAGMENTS CLICK
                     if(attributeNum == 1) {
+                       let rotateParent = this.parentNode.parentNode.nextElementSibling.nextElementSibling;
+                       let rotateLines = rotateParent.querySelectorAll('.option-line');
+
+                       for(let k = 0; k < rotateLines.length; k++) {
+                           rotateLines[k].childNodes[1].checked = false;
+                       }
+
+                       rotateParent.childNodes[1].childNodes[1].childNodes[1].checked = true;
+                       let rotateAttr = this.parentNode.parentNode.nextElementSibling.childNodes[1];
+
+                       rotateAttr.innerHTML = 'Up';
+                       rotateAttr.setAttribute('option-default-value','Up');
+                       rotateAttr.setAttribute('data-posit','');
+
                        let currentPrice = +this.querySelector('.price-line').innerHTML.replace('$', '');
                        let currentPriceQty = currentQty * currentPrice;
                        document.querySelector('.per-price-value').innerHTML = '$' + currentPrice;
                        document.querySelector('.input-price').innerHTML = '$' + roundPlus(currentPriceQty, 2);
                     }
 
-                    if(attribute.getAttribute('attribute-title') == 'Type') {
-                      console.log(lineOptionId);
-                       if(lineOptionId == 98 || lineOptionId == 535){
-                          attribute.childNodes[1].innerHTML = currentSelectedValue + ' ' + 'T326';
+                    // ROTATE CLICK
+                    if(attributeNum == 2){
+                       let dataMask = document.querySelector('.image-big-first').getAttribute('data-src');
+                       let rotate = this.childNodes[1].value;
+                       let rotatedMask;
+
+                       if(rotate == 'Up') {
+                          rotatedMask = dataMask;
+                       } else {
+                          let arrayPath = dataMask.split('/');
+                          let arrayMask = arrayPath[3].split('.');
+                          rotatedMask = '/'+arrayPath[1]+'/rotate/'+arrayPath[2]+'/'+ arrayMask[0]+'_'+ rotate+'.'+arrayMask[1];
                        }
+
+                       imageLayerFirst.setAttribute("src", rotatedMask);
+                       imageLayerFirst.style.top = '0';
+                       imageLayerFirst.style.left = '0';
 
                     }
 
@@ -148,7 +168,7 @@ function optionLineClick(e) {
 }
 
 // 3
-function updatePrices(oneId, productId, attributeId, optionBlock, propertyLine, attributeTitle, currentQty, i) {
+function updatePrices(oneId, productId, attributeId, optionBlock, attributeTitle, currentQty, i) {
     optionBlock.innerHTML = '';
     let xhr = createXHR();
     xhr.onreadystatechange = function() {
@@ -165,6 +185,7 @@ function updatePrices(oneId, productId, attributeId, optionBlock, propertyLine, 
                     optionLine = document.createElement("div");
                     optionLine.setAttribute("class", "option-line");
                     optionLine.setAttribute("line-option-id", listJsonData[j].option_id);
+                    optionLine.setAttribute("line-option-mask", listJsonData[j].option_mask);
                     optionBlock.appendChild(optionLine);
 
                     // #1.1 Radio
@@ -221,6 +242,26 @@ function updatePrices(oneId, productId, attributeId, optionBlock, propertyLine, 
                     currentPrice = listJsonData[setInxJ].price_value;
                  }
 
+                 imageLayerFirst.setAttribute("src", listJsonData[0].option_mask);
+                 imageLayerFirst.setAttribute("data-src", listJsonData[0].option_mask);
+                 imageLayerFirst.style.top = '0';
+                 imageLayerFirst.style.left = '0';
+
+                 let rotateAttr = optionBlock.parentNode.nextElementSibling.childNodes[1];
+
+                 rotateAttr.innerHTML = 'Up';
+                 rotateAttr.setAttribute('option-default-value','Up');
+                 rotateAttr.setAttribute('data-posit','');
+
+                 let rotateBlock = optionBlock.parentNode.nextElementSibling.nextElementSibling.childNodes[1];
+                 let rotateLines = rotateBlock.querySelectorAll('.option-line');
+
+                 for(let k = 0; k < rotateLines.length; k++) {
+                     rotateLines[k].childNodes[1].checked = false;
+                 }
+
+                 rotateLines[0].childNodes[1].checked = true;
+
                  let resQty = currentPrice * currentQty;
                  let currentPriceQty = roundPlus(resQty, 2);
 
@@ -236,7 +277,6 @@ function updatePrices(oneId, productId, attributeId, optionBlock, propertyLine, 
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     xhr.send(null);
 }
-
 
 //5
 function roundPlus(x, n) {
@@ -285,7 +325,7 @@ addEventListener('load', function(e) { attributeLineClick();}, false );
 addEventListener('load', function() { funQty();}, false );
 addEventListener('click', function(e) { optionLineClick(e);}, false );
 
-$('.draggable-above-calendar').draggable({
+$('.draggable-above-image').draggable({
      containment: $('.image-area'),
      stop: function(event, ui) {
            let product = document.getElementById('cart-block').getAttribute('product-id');
@@ -293,6 +333,7 @@ $('.draggable-above-calendar').draggable({
            let positionLeft = parseInt(ui.position.left);
            let positionTop = parseInt(ui.position.top);
            let attributeLine = document.querySelectorAll('.attribute-line');
+
            let dataDefault = attributeLine[2].childNodes[1];
            let dataDefaultValue = dataDefault.getAttribute('option-default-value');
 
@@ -307,7 +348,7 @@ $('.draggable-above-calendar').draggable({
            if(positionTop==0 && positionLeft==0){
               dataDefault.innerHTML = dataDefaultValue;
               dataDefault.setAttribute('data-posit','');
-              this.style.bottom = "0px";
+              this.style.top = "0px";
               this.style.left = "0px";
            }
       }
