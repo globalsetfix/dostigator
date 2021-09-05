@@ -93,12 +93,18 @@ function optionLineClick(e) {
 
                     this.parentNode.parentNode.setAttribute('data-label',currentSelectedValue);
 
+
+
                     let dataMask = this.getAttribute('line-option-mask');
+
+
                     if(dataMask){
-                       imageLayerFirst.setAttribute("src", dataMask);
-                       imageLayerFirst.setAttribute("data-src", dataMask);
-                       imageLayerFirst.style.left = '0';
-                       imageLayerFirst.style.top = '0';
+                       if(dataMask != 'null'){
+                          imageLayerFirst.setAttribute("src", dataMask);
+                          imageLayerFirst.setAttribute("data-src", dataMask);
+                          imageLayerFirst.style.left = '0';
+                          imageLayerFirst.style.top = '0';
+                      }
                     }
 
                     // SIZE CLICK
@@ -109,12 +115,9 @@ function optionLineClick(e) {
                        let attributeId = nextParent.getAttribute('attribute-id');
                        let nextOptionBlock = nextParent.nextElementSibling.childNodes[1];
                        let attributeTitle = nextParent.childNodes[1].innerHTML;
-                       updatePrices(oneId, productId, attributeId, nextOptionBlock, attributeTitle, currentQty, i);
-                    }
 
-                    // FRAGMENTS CLICK
-                    if(attributeNum == 1) {
-                       let rotateParent = this.parentNode.parentNode.nextElementSibling.nextElementSibling;
+                       let rotateParent = this.parentNode.parentNode.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling;
+                       console.log(rotateParent);
                        let rotateLines = rotateParent.querySelectorAll('.option-line');
 
                        for(let k = 0; k < rotateLines.length; k++) {
@@ -122,11 +125,17 @@ function optionLineClick(e) {
                        }
 
                        rotateParent.childNodes[1].childNodes[1].childNodes[1].checked = true;
-                       let rotateAttr = this.parentNode.parentNode.nextElementSibling.childNodes[1];
+                       let rotateAttr = this.parentNode.parentNode.nextElementSibling.nextElementSibling.nextElementSibling.childNodes[1];
 
                        rotateAttr.innerHTML = 'Up';
                        rotateAttr.setAttribute('option-default-value','Up');
                        rotateAttr.setAttribute('data-posit','');
+
+                       updatePrices(oneId, productId, attributeId, nextOptionBlock, attributeTitle, currentQty, i);
+                    }
+
+                    // FRAGMENTS CLICK
+                    if(attributeNum == 1) {
 
                        let currentPrice = +this.querySelector('.price-line').innerHTML.replace('$', '');
                        let currentPriceQty = currentQty * currentPrice;
@@ -151,8 +160,7 @@ function optionLineClick(e) {
                        imageLayerFirst.setAttribute("src", rotatedMask);
                        imageLayerFirst.style.top = '0';
                        imageLayerFirst.style.left = '0';
-
-                    }
+                   }
 
                     // PRINT CLICK
                     if(attribute.getAttribute('attribute-title') == 'Print') {
@@ -241,26 +249,6 @@ function updatePrices(oneId, productId, attributeId, optionBlock, attributeTitle
                     attributeDefault.innerHTML = listJsonData[setInxJ].option_title;
                     currentPrice = listJsonData[setInxJ].price_value;
                  }
-
-                 imageLayerFirst.setAttribute("src", listJsonData[0].option_mask);
-                 imageLayerFirst.setAttribute("data-src", listJsonData[0].option_mask);
-                 imageLayerFirst.style.top = '0';
-                 imageLayerFirst.style.left = '0';
-
-                 let rotateAttr = optionBlock.parentNode.nextElementSibling.childNodes[1];
-
-                 rotateAttr.innerHTML = 'Up';
-                 rotateAttr.setAttribute('option-default-value','Up');
-                 rotateAttr.setAttribute('data-posit','');
-
-                 let rotateBlock = optionBlock.parentNode.nextElementSibling.nextElementSibling.childNodes[1];
-                 let rotateLines = rotateBlock.querySelectorAll('.option-line');
-
-                 for(let k = 0; k < rotateLines.length; k++) {
-                     rotateLines[k].childNodes[1].checked = false;
-                 }
-
-                 rotateLines[0].childNodes[1].checked = true;
 
                  let resQty = currentPrice * currentQty;
                  let currentPriceQty = roundPlus(resQty, 2);
