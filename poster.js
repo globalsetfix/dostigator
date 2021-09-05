@@ -34,15 +34,17 @@ function attributeLineClick() {
 //2
 function optionLineClick(e) {
 
+
+
     const STATECLASSNAME = 'opened';
 
     let currentEl = e.target;
     let currentElClasses = currentEl.classList;
     let flagClick = false;
-    let curentQtyObj = document.querySelector('.input-qty');
+    let currentQty = +document.querySelector('.input-qty').value;
 
-    if(curentQtyObj.value=='' || curentQtyObj.value==0){
-       curentQtyObj.value=1;
+    if(currentQty=='' || currentQty==0){
+       currentQty=1;
        document.querySelector('.input-price').textContent = document.querySelector('.per-price-value').textContent;
     }
 
@@ -66,7 +68,32 @@ function optionLineClick(e) {
     let attributeLength = attributeLine.length - 1;
 
     if(attributeLength > 1) {
-       for(let i = 0; i < optionLine.length; i++) {
+      let colorLines = cartBlock.querySelectorAll('.option-color');
+      for(let j = 0; j < colorLines.length; j++) {
+         (function(j) {
+             colorLines[j].onclick = function() {
+                let optionColor = this.querySelector('img').getAttribute('title');
+                let optionMask = this.getAttribute('line-option-mask');
+                let optionId = this.getAttribute('line-option-id');
+                let prevParentNode = this.parentNode.parentNode;
+
+                imageArea.style.backgroundImage = "url('"+optionMask+"')";
+
+                prevParentNode.setAttribute('data-label',optionColor);
+                prevParentNode.previousElementSibling.childNodes[1].setAttribute('option-default-id', optionId);
+                prevParentNode.previousElementSibling.childNodes[1].innerHTML = optionColor;
+
+                let currentPrice = +this.querySelector('img').getAttribute('data-price').replace('$', '');
+                let currentPriceQty = currentQty * currentPrice;
+
+                document.querySelector('.per-price-value').innerHTML = '$' + currentPrice;
+                document.querySelector('.input-price').innerHTML = '$' + roundPlus(currentPriceQty, 2);
+             }
+         })(j);
+      }
+
+      for(let i = 0; i < optionLine.length; i++) {
+
           (function(i) {
                optionLine[i].onclick = function() {
 
@@ -89,23 +116,9 @@ function optionLineClick(e) {
                     attribute.classList.remove("opened");
 
                     this.querySelector('.radio-html').checked = true;
-                    let currentQty = +document.querySelector('.input-qty').value;
-
                     this.parentNode.parentNode.setAttribute('data-label',currentSelectedValue);
 
 
-
-                    let dataMask = this.getAttribute('line-option-mask');
-
-
-                    if(dataMask){
-                       if(dataMask != 'null'){
-                          imageLayerFirst.setAttribute("src", dataMask);
-                          imageLayerFirst.setAttribute("data-src", dataMask);
-                          imageLayerFirst.style.left = '0';
-                          imageLayerFirst.style.top = '0';
-                      }
-                    }
 
                     // SIZE CLICK
                     if(attributeNum == 0) {
@@ -115,52 +128,8 @@ function optionLineClick(e) {
                        let attributeId = nextParent.getAttribute('attribute-id');
                        let nextOptionBlock = nextParent.nextElementSibling.childNodes[1];
                        let attributeTitle = nextParent.childNodes[1].innerHTML;
-
-                       let rotateParent = this.parentNode.parentNode.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling;
-                       console.log(rotateParent);
-                       let rotateLines = rotateParent.querySelectorAll('.option-line');
-
-                       for(let k = 0; k < rotateLines.length; k++) {
-                           rotateLines[k].childNodes[1].checked = false;
-                       }
-
-                       rotateParent.childNodes[1].childNodes[1].childNodes[1].checked = true;
-                       let rotateAttr = this.parentNode.parentNode.nextElementSibling.nextElementSibling.nextElementSibling.childNodes[1];
-
-                       rotateAttr.innerHTML = 'Up';
-                       rotateAttr.setAttribute('option-default-value','Up');
-                       rotateAttr.setAttribute('data-posit','');
-
                        updatePrices(oneId, productId, attributeId, nextOptionBlock, attributeTitle, currentQty, i);
                     }
-
-                    // FRAGMENTS CLICK
-                    if(attributeNum == 1) {
-
-                       let currentPrice = +this.querySelector('.price-line').innerHTML.replace('$', '');
-                       let currentPriceQty = currentQty * currentPrice;
-                       document.querySelector('.per-price-value').innerHTML = '$' + currentPrice;
-                       document.querySelector('.input-price').innerHTML = '$' + roundPlus(currentPriceQty, 2);
-                    }
-
-                    // ROTATE CLICK
-                    if(attributeNum == 2){
-                       let dataMask = document.querySelector('.image-big-first').getAttribute('data-src');
-                       let rotate = this.childNodes[1].value;
-                       let rotatedMask;
-
-                       if(rotate == 'Up') {
-                          rotatedMask = dataMask;
-                       } else {
-                          let arrayPath = dataMask.split('/');
-                          let arrayMask = arrayPath[3].split('.');
-                          rotatedMask = '/'+arrayPath[1]+'/rotate/'+arrayPath[2]+'/'+ arrayMask[0]+'_'+ rotate+'.'+arrayMask[1];
-                       }
-
-                       imageLayerFirst.setAttribute("src", rotatedMask);
-                       imageLayerFirst.style.top = '0';
-                       imageLayerFirst.style.left = '0';
-                   }
 
                     // PRINT CLICK
                     if(attribute.getAttribute('attribute-title') == 'Print') {
@@ -188,37 +157,21 @@ function updatePrices(oneId, productId, attributeId, optionBlock, attributeTitle
 
                 for(let j = 0; j < listJsonData.length; j++) {
 
-                    let optionLine, radioHtml, valueOptionLine, priceOptionLine;
+                    let optionLine, valueOptionLine, priceOptionLine;
 
                     optionLine = document.createElement("div");
-                    optionLine.setAttribute("class", "option-line");
+                    optionLine.setAttribute("class", "option-color");
                     optionLine.setAttribute("line-option-id", listJsonData[j].option_id);
                     optionLine.setAttribute("line-option-mask", listJsonData[j].option_mask);
                     optionBlock.appendChild(optionLine);
 
-                    // #1.1 Radio
-                    radioHtml = document.createElement("input");
-                    radioHtml.setAttribute("type", "radio");
-                    radioHtml.setAttribute("value", listJsonData[j].option_title);
-                    radioHtml.setAttribute("class", "radio-html");
-
-                    optionLine.appendChild(radioHtml);
-
-                    // #1.2 TiTle
-                    valueOptionLine = document.createElement("span");
-                    valueOptionLine.setAttribute("class", "value-line");
-                    valueOptionLine.innerHTML = listJsonData[j].option_title;
+                    valueOptionLine = document.createElement("img");
+                    valueOptionLine.setAttribute("src", listJsonData[j].option_color_icon);
+                    valueOptionLine.setAttribute("data-price", listJsonData[j].price_value);
+                    valueOptionLine.setAttribute("title", listJsonData[j].option_title);
                     optionLine.appendChild(valueOptionLine);
 
-                    // #1.3 Price
-                    priceOptionLine = document.createElement("span");
-                    priceOptionLine.setAttribute("class", "price-line");
-                    priceOptionLine.innerHTML = (listJsonData[j].price_value != '') ? '$' + listJsonData[j].price_value : '';
-
-                    optionLine.appendChild(priceOptionLine);
-
                     if(attributeTitle == listJsonData[j].option_title){
-                       radioHtml.checked = true;
                        equalityProps = true;
                        currentPrice = listJsonData[j].price_value;
                     }
@@ -242,7 +195,7 @@ function updatePrices(oneId, productId, attributeId, optionBlock, attributeTitle
                         }
                     }
 
-                    linesOptionBlock[setInxK].querySelector('.radio-html').checked = true;
+
                     optionBlock.parentNode.setAttribute('data-label',listJsonData[setInxJ].option_title);
                     attributeDefault.setAttribute('option-default-value',listJsonData[setInxJ].option_title);
                     attributeDefault.setAttribute('option-default-id',listJsonData[setInxJ].option_id);
@@ -312,32 +265,3 @@ function setQty(e){
 addEventListener('load', function(e) { attributeLineClick();}, false );
 addEventListener('load', function() { funQty();}, false );
 addEventListener('click', function(e) { optionLineClick(e);}, false );
-
-$('.draggable-above-image').draggable({
-     containment: $('.image-area'),
-     stop: function(event, ui) {
-           let product = document.getElementById('cart-block').getAttribute('product-id');
-           let resultPos;
-           let positionLeft = parseInt(ui.position.left);
-           let positionTop = parseInt(ui.position.top);
-           let attributeLine = document.querySelectorAll('.attribute-line');
-
-           let dataDefault = attributeLine[2].childNodes[1];
-           let dataDefaultValue = dataDefault.getAttribute('option-default-value');
-
-           if(positionLeft>0) resultPos = 'L'+positionLeft;
-           if(positionTop>0) resultPos = 'T'+positionTop;
-
-           if(resultPos){
-              dataDefault.setAttribute('data-posit',resultPos);
-              dataDefault.innerHTML = dataDefaultValue + ' ' + resultPos;
-           }
-
-           if(positionTop==0 && positionLeft==0){
-              dataDefault.innerHTML = dataDefaultValue;
-              dataDefault.setAttribute('data-posit','');
-              this.style.top = "0px";
-              this.style.left = "0px";
-           }
-      }
-});
