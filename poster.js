@@ -8,6 +8,8 @@
 */
 
 let cartBlock = document.getElementById('cart-block');
+let imageArea = document.querySelector('.image-area');
+let imageLayerFirst = imageArea.querySelector('.image-big-first');
 
 //1
 function attributeLineClick() {
@@ -89,6 +91,22 @@ function optionLineClick(e) {
                     this.querySelector('.radio-html').checked = true;
                     let currentQty = +document.querySelector('.input-qty').value;
 
+                    this.parentNode.parentNode.setAttribute('data-label',currentSelectedValue);
+
+                    let dataMask = this.getAttribute('line-option-mask');
+                    if(dataMask){
+                       imageLayerFirst.setAttribute("src", dataMask);
+                       imageLayerFirst.setAttribute("data-src", dataMask);
+                       imageLayerFirst.style.left = '0';
+                       imageLayerFirst.style.removeProperty('bottom');
+                       imageLayerFirst.style.removeProperty('top');
+                       if(lineOptionId == 98 || lineOptionId == 535){
+                          imageLayerFirst.style.bottom = '0';
+                       } else {
+                          imageLayerFirst.style.top = '0';
+                       }
+                    }
+
                     // SIZE CLICK
                     if(attributeNum == 0) {
                        let oneId = this.getAttribute('line-option-id');
@@ -106,6 +124,14 @@ function optionLineClick(e) {
                        let currentPriceQty = currentQty * currentPrice;
                        document.querySelector('.per-price-value').innerHTML = '$' + currentPrice;
                        document.querySelector('.input-price').innerHTML = '$' + roundPlus(currentPriceQty, 2);
+                    }
+
+                    if(attribute.getAttribute('attribute-title') == 'Type') {
+                      console.log(lineOptionId);
+                       if(lineOptionId == 98 || lineOptionId == 535){
+                          attribute.childNodes[1].innerHTML = currentSelectedValue + ' ' + 'T326';
+                       }
+
                     }
 
                     // PRINT CLICK
@@ -258,3 +284,31 @@ function setQty(e){
 addEventListener('load', function(e) { attributeLineClick();}, false );
 addEventListener('load', function() { funQty();}, false );
 addEventListener('click', function(e) { optionLineClick(e);}, false );
+
+$('.draggable-above-calendar').draggable({
+     containment: $('.image-area'),
+     stop: function(event, ui) {
+           let product = document.getElementById('cart-block').getAttribute('product-id');
+           let resultPos;
+           let positionLeft = parseInt(ui.position.left);
+           let positionTop = parseInt(ui.position.top);
+           let attributeLine = document.querySelectorAll('.attribute-line');
+           let dataDefault = attributeLine[2].childNodes[1];
+           let dataDefaultValue = dataDefault.getAttribute('option-default-value');
+
+           if(positionLeft>0) resultPos = 'L'+positionLeft;
+           if(positionTop>0) resultPos = 'T'+positionTop;
+
+           if(resultPos){
+              dataDefault.setAttribute('data-posit',resultPos);
+              dataDefault.innerHTML = dataDefaultValue + ' ' + resultPos;
+           }
+
+           if(positionTop==0 && positionLeft==0){
+              dataDefault.innerHTML = dataDefaultValue;
+              dataDefault.setAttribute('data-posit','');
+              this.style.bottom = "0px";
+              this.style.left = "0px";
+           }
+      }
+});
