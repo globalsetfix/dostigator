@@ -34,8 +34,6 @@ function attributeLineClick() {
 //2
 function optionLineClick(e) {
 
-
-
     const STATECLASSNAME = 'opened';
 
     let currentEl = e.target;
@@ -69,9 +67,9 @@ function optionLineClick(e) {
 
     if(attributeLength > 1) {
       let colorLines = cartBlock.querySelectorAll('.option-color');
-      for(let j = 0; j < colorLines.length; j++) {
-         (function(j) {
-             colorLines[j].onclick = function() {
+      for(let i = 0; i < colorLines.length; i++) {
+         (function(i) {
+             colorLines[i].onclick = function() {
                 let optionColor = this.querySelector('img').getAttribute('title');
                 let optionMask = this.getAttribute('line-option-mask');
                 let optionId = this.getAttribute('line-option-id');
@@ -89,11 +87,10 @@ function optionLineClick(e) {
                 document.querySelector('.per-price-value').innerHTML = '$' + currentPrice;
                 document.querySelector('.input-price').innerHTML = '$' + roundPlus(currentPriceQty, 2);
              }
-         })(j);
+         })(i);
       }
 
       for(let i = 0; i < optionLine.length; i++) {
-
           (function(i) {
                optionLine[i].onclick = function() {
 
@@ -118,8 +115,6 @@ function optionLineClick(e) {
                     this.querySelector('.radio-html').checked = true;
                     this.parentNode.parentNode.setAttribute('data-label',currentSelectedValue);
 
-
-
                     // SIZE CLICK
                     if(attributeNum == 0) {
                        let oneId = this.getAttribute('line-option-id');
@@ -129,6 +124,9 @@ function optionLineClick(e) {
                        let nextOptionBlock = nextParent.nextElementSibling.childNodes[1];
                        let attributeTitle = nextParent.childNodes[1].innerHTML;
                        updatePrices(oneId, productId, attributeId, nextOptionBlock, attributeTitle, currentQty, i);
+
+                       let optionMask = this.getAttribute('line-option-mask');
+                       imageArea.style.backgroundImage = "url('"+optionMask+"')";
                     }
 
                     // PRINT CLICK
@@ -157,21 +155,37 @@ function updatePrices(oneId, productId, attributeId, optionBlock, attributeTitle
 
                 for(let j = 0; j < listJsonData.length; j++) {
 
-                    let optionLine, valueOptionLine, priceOptionLine;
+                    let optionLine, radioHtml, valueOptionLine, priceOptionLine;
 
                     optionLine = document.createElement("div");
-                    optionLine.setAttribute("class", "option-color");
+                    optionLine.setAttribute("class", "option-line");
                     optionLine.setAttribute("line-option-id", listJsonData[j].option_id);
                     optionLine.setAttribute("line-option-mask", listJsonData[j].option_mask);
                     optionBlock.appendChild(optionLine);
 
-                    valueOptionLine = document.createElement("img");
-                    valueOptionLine.setAttribute("src", listJsonData[j].option_color_icon);
-                    valueOptionLine.setAttribute("data-price", listJsonData[j].price_value);
-                    valueOptionLine.setAttribute("title", listJsonData[j].option_title);
+                    // #1.1 Radio
+                    radioHtml = document.createElement("input");
+                    radioHtml.setAttribute("type", "radio");
+                    radioHtml.setAttribute("value", listJsonData[j].option_title);
+                    radioHtml.setAttribute("class", "radio-html");
+
+                    optionLine.appendChild(radioHtml);
+
+                    // #1.2 TiTle
+                    valueOptionLine = document.createElement("span");
+                    valueOptionLine.setAttribute("class", "value-line");
+                    valueOptionLine.innerHTML = listJsonData[j].option_title;
                     optionLine.appendChild(valueOptionLine);
 
+                    // #1.3 Price
+                    priceOptionLine = document.createElement("span");
+                    priceOptionLine.setAttribute("class", "price-line");
+                    priceOptionLine.innerHTML = (listJsonData[j].price_value != '') ? '$' + listJsonData[j].price_value : '';
+
+                    optionLine.appendChild(priceOptionLine);
+
                     if(attributeTitle == listJsonData[j].option_title){
+                       radioHtml.checked = true;
                        equalityProps = true;
                        currentPrice = listJsonData[j].price_value;
                     }
